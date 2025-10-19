@@ -123,10 +123,10 @@ const UsersTable = ({ refreshKey }: { refreshKey: number }) => {
           <tbody>
             {users.map((u) => (
               <tr key={u.id} className="border-t">
-                <td className="p-2">{u.email}</td>
-                <td className="p-2">{u.role}</td>
-                <td className="p-2">{u.status}</td>
-                <td className="p-2">
+                <td className="p-2  md:p-4 md:w-48">{u.email}</td>
+                <td className="p-2 md:p-4 md:w-48">{u.role}</td>
+                <td className="p-2 md:p-4 md:w-48">{u.status}</td>
+                <td className="p-2 md:p-4 md:w-48">
                   {new Date(u.createdAt).toLocaleString()}
                 </td>
               </tr>
