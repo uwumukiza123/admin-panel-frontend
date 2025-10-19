@@ -2,7 +2,7 @@
 
 import { useState } from "react";
 import CreateUser from "@/components/CreateUser";
-import UsersChartCard from "@/components/UsersChart/Card";
+import UsersChartCard from "@/components/UsersChart";
 import UsersTable from "@/components/UsersTable";
 
 export default function Home() {
