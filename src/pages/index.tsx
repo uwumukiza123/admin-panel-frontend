@@ -3,6 +3,7 @@
 import { useState } from "react";
 import CreateUser from "@/components/CreateUser";
 import UsersChartCard from "@/components/UsersChart/Card";
+import UsersTable from "@/components/UsersTable";
 
 export default function Home() {
   const [refreshKey, setRefreshKey] = useState(0);
@@ -14,6 +15,8 @@ export default function Home() {
         <CreateUser onUserCreated={() => setRefreshKey((k) => k + 1)} />
         <UsersChartCard refreshKey={refreshKey} />
       </div>
+
+      <UsersTable refreshKey={refreshKey} />
     </div>
   );
 }
