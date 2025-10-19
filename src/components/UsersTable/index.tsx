@@ -18,7 +18,6 @@ const UsersTable = ({ refreshKey }: { refreshKey: number }) => {
       try {
         const res = await fetch("http://localhost:3000/users/export");
         if (!res.ok) throw new Error("Failed to fetch /users/export");
-
         const arrayBuffer = await res.arrayBuffer();
 
         const protoStr = `
@@ -27,10 +26,11 @@ const UsersTable = ({ refreshKey }: { refreshKey: number }) => {
           message User {
             string id = 1;
             string email = 2;
-            string role = 3;
-            string status = 4;
-            string createdAt = 5;
-            string signature = 6;
+            string hashedEmail = 3;
+            string role = 4;
+            string status = 5;
+            string createdAt = 6;
+            string signature = 7;
           }
           message Users {
             repeated User users = 1;
@@ -51,6 +51,7 @@ const UsersTable = ({ refreshKey }: { refreshKey: number }) => {
           (u: any) => ({
             id: u.id,
             email: u.email,
+            hashedEmail: u.hashedEmail,
             role: u.role,
             status: u.status,
             createdAt: u.createdAt,
@@ -64,47 +65,20 @@ const UsersTable = ({ refreshKey }: { refreshKey: number }) => {
         const cryptoKey = await importPublicKey(pem);
 
         const verifiedUsers: UserProto[] = [];
-        const encoder = new TextEncoder();
 
         for (const u of exportedUsers) {
           try {
-            if (!u.signature) continue;
+            if (!u.signature || !u.hashedEmail) continue;
 
             const signatureBytes = base64ToUint8Array(u.signature);
-            const emailBytes = encoder.encode(u.email);
-            const digest = await crypto.subtle.digest("SHA-384", emailBytes);
+            const hashBytes = new TextEncoder().encode(u.hashedEmail);
 
-            let valid = false;
-
-            valid = await crypto.subtle.verify(
+            const valid = await crypto.subtle.verify(
               { name: "RSASSA-PKCS1-v1_5" },
               cryptoKey,
               signatureBytes,
-              digest
+              hashBytes
             );
-
-            if (!valid) {
-              valid = await crypto.subtle.verify(
-                { name: "RSASSA-PKCS1-v1_5" },
-                cryptoKey,
-                signatureBytes,
-                emailBytes
-              );
-            }
-
-            if (!valid) {
-              const hex = Array.from(new Uint8Array(digest))
-                .map((b) => b.toString(16).padStart(2, "0"))
-                .join("");
-              const hexBytes = encoder.encode(hex);
-
-              valid = await crypto.subtle.verify(
-                { name: "RSASSA-PKCS1-v1_5" },
-                cryptoKey,
-                signatureBytes,
-                hexBytes
-              );
-            }
 
             if (valid) verifiedUsers.push(u);
             else console.warn("Invalid signature for:", u.email);
